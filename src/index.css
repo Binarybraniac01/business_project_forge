@@ -107,6 +107,10 @@
     animation: marquee 25s linear infinite;
   }
 
+  .animate-marquee-slow {
+    animation: marquee 45s linear infinite;
+  }
+
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out forwards;
   }

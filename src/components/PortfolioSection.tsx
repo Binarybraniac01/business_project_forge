@@ -26,11 +26,32 @@ const projects = [
     image: projectImage3,
     tags: ["React", "Django", "PostgreSQL"],
   },
+  {
+    id: 4,
+    title: "Healthcare Appointment System",
+    description: "Patient management system with real-time scheduling and automated reminders.",
+    image: projectImage1,
+    tags: ["React", "Node.js", "MongoDB"],
+  },
+  {
+    id: 5,
+    title: "Smart Inventory Tracker",
+    description: "IoT-enabled inventory management with barcode scanning and analytics dashboard.",
+    image: projectImage2,
+    tags: ["Python", "Flask", "MySQL"],
+  },
+  {
+    id: 6,
+    title: "Student Portal System",
+    description: "Comprehensive student management with grades, attendance, and course registration.",
+    image: projectImage3,
+    tags: ["Java", "Spring Boot", "PostgreSQL"],
+  },
 ];
 
 const PortfolioSection = () => {
   return (
-    <section id="portfolio" className="py-16 sm:py-20 lg:py-24">
+    <section id="portfolio" className="py-16 sm:py-20 lg:py-24 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
@@ -40,12 +61,20 @@ const PortfolioSection = () => {
             Real projects we've delivered. Each one custom-built with clean code and comprehensive documentation.
           </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {projects.map((project) => (
+      {/* Marquee Container */}
+      <div className="relative">
+        {/* Gradient Overlays */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+        {/* Scrolling Cards */}
+        <div className="flex animate-marquee-slow hover:[animation-play-state:paused]">
+          {[...projects, ...projects].map((project, index) => (
             <Card
-              key={project.id}
-              className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
+              key={`${project.id}-${index}`}
+              className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer flex-shrink-0 w-[320px] sm:w-[380px] mx-3 sm:mx-4"
             >
               {/* Image Container - 16:9 aspect ratio */}
               <div className="relative aspect-video overflow-hidden">
@@ -67,7 +96,7 @@ const PortfolioSection = () => {
                   {project.description}
                 </p>
                 
-                {/* Tech Tags - matching Team Section style */}
+                {/* Tech Tags */}
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
                     <span
