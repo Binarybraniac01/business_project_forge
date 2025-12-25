@@ -1,10 +1,13 @@
-import { ArrowRight, ExternalLink, FileText } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, ExternalLink, FileText, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useContactModal } from "@/contexts/ContactModalContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import TechSpecsModal from "@/components/TechSpecsModal";
 import projectImage1 from "@/assets/project-dashboard-1.png";
 import projectImage2 from "@/assets/project-dashboard-2.png";
 import projectImage3 from "@/assets/project-dashboard-3.png";
@@ -91,6 +94,17 @@ const getDifficultyColor = (difficulty: string) => {
 
 const ProjectIdeas = () => {
   const { openModal } = useContactModal();
+  const isMobile = useIsMobile();
+  const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  const [modalProject, setModalProject] = useState<typeof projectTemplates[0] | null>(null);
+
+  const handleTechSpecsClick = (project: typeof projectTemplates[0]) => {
+    if (isMobile) {
+      setExpandedCardId(expandedCardId === project.id ? null : project.id);
+    } else {
+      setModalProject(project);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,67 +162,90 @@ const ProjectIdeas = () => {
       <section className="pb-16 sm:pb-20 lg:pb-24">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {projectTemplates.map((project) => (
-              <Card
-                key={project.id}
-                className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col"
-              >
-                {/* Image Container - 16:9 aspect ratio */}
-                <div className="relative aspect-video overflow-hidden">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 right-3">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getDifficultyColor(project.difficulty)}`}>
-                      {project.difficulty}
-                    </span>
-                  </div>
-                </div>
-
-                <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
-                  <h3 className="text-base sm:text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                    {project.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-grow">
-                    {project.description}
-                  </p>
-                  
-                  {/* Tech Tags */}
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {project.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="tech-badge text-xs">
-                        {tag}
+            {projectTemplates.map((project) => {
+              const isExpanded = expandedCardId === project.id;
+              
+              return (
+                <Card
+                  key={project.id}
+                  className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col"
+                >
+                  {/* Image Container - 16:9 aspect ratio */}
+                  <div className="relative aspect-video overflow-hidden">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getDifficultyColor(project.difficulty)}`}>
+                        {project.difficulty}
                       </span>
-                    ))}
-                    {project.tags.length > 3 && (
-                      <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
-                    )}
+                    </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button 
-                      variant="glow" 
-                      size="sm" 
-                      className="flex-1 gap-2 min-h-[40px]"
-                    >
-                      <ExternalLink size={14} />
-                      Live Preview
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 gap-2 min-h-[40px] border-border hover:bg-muted/50"
-                    >
-                      <FileText size={14} />
-                      Tech Specs
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                    <h3 className="text-base sm:text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                      {project.title}
+                    </h3>
+                    
+                    {/* Description - truncated by default, full on mobile expand */}
+                    <p className={`text-muted-foreground text-sm mb-4 transition-all duration-300 ${
+                      isMobile && isExpanded ? '' : 'line-clamp-2'
+                    }`}>
+                      {project.description}
+                    </p>
+                    
+                    {/* Tech Tags - limited by default, all on mobile expand */}
+                    <div className={`flex flex-wrap gap-1.5 mb-4 transition-all duration-300 ${
+                      isMobile && isExpanded ? '' : 'flex-grow'
+                    }`}>
+                      {(isMobile && isExpanded ? project.tags : project.tags.slice(0, 3)).map((tag) => (
+                        <span key={tag} className="tech-badge text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                      {!isMobile && project.tags.length > 3 && (
+                        <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
+                      )}
+                      {isMobile && !isExpanded && project.tags.length > 3 && (
+                        <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button 
+                        variant="glow" 
+                        size="sm" 
+                        className="flex-1 gap-2 min-h-[40px]"
+                      >
+                        <ExternalLink size={14} />
+                        Live Preview
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-2 min-h-[40px] border-border hover:bg-muted/50"
+                        onClick={() => handleTechSpecsClick(project)}
+                      >
+                        {isMobile && isExpanded ? (
+                          <>
+                            <ChevronUp size={14} />
+                            Show Less
+                          </>
+                        ) : (
+                          <>
+                            <FileText size={14} />
+                            Tech Specs
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -237,6 +274,14 @@ const ProjectIdeas = () => {
       </section>
 
       <Footer />
+
+      {/* Tech Specs Modal for Desktop/Tablet */}
+      <TechSpecsModal
+        project={modalProject}
+        isOpen={!!modalProject}
+        onClose={() => setModalProject(null)}
+        getDifficultyColor={getDifficultyColor}
+      />
     </div>
   );
 };
