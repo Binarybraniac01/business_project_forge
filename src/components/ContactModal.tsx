@@ -67,7 +67,7 @@ const ContactModal = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}
@@ -75,9 +75,9 @@ const ContactModal = () => {
 
       {/* Modal */}
       <div
-        className={`relative z-10 w-full max-w-lg mx-4 md:mx-auto ${
+        className={`relative z-10 w-full max-w-md ${
           isMobile
-            ? "animate-slide-up rounded-t-2xl rounded-b-none mb-0"
+            ? "animate-slide-up rounded-2xl mb-0 max-h-[85vh] overflow-y-auto"
             : "animate-scale-in rounded-2xl"
         }`}
       >
@@ -88,24 +88,24 @@ const ContactModal = () => {
           {/* Close button */}
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 z-20 p-2 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute top-3 right-3 z-20 p-2 rounded-full bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close modal"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
 
           {/* Content */}
-          <div className="relative p-6 md:p-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+          <div className="relative p-5 md:p-6 pt-10">
+            <h2 className="text-xl md:text-2xl font-bold mb-1">
               Let's Build Your <span className="text-gradient">Project</span>.
             </h2>
-            <p className="text-muted-foreground text-sm md:text-base mb-6">
+            <p className="text-muted-foreground text-sm mb-4">
               Fill in the details below. We'll reach out to discuss your requirements.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-foreground">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-foreground text-sm">
                   Full Name
                 </Label>
                 <Input
@@ -115,12 +115,12 @@ const ContactModal = () => {
                   placeholder="John Doe"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="bg-muted/50 border-border focus:border-primary h-12"
+                  className="bg-muted/50 border-border focus:border-primary h-10"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-foreground">
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="text-foreground text-sm">
                   Phone Number
                 </Label>
                 <Input
@@ -131,12 +131,12 @@ const ContactModal = () => {
                   placeholder="+1 (555) 000-0000"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="bg-muted/50 border-border focus:border-primary h-12"
+                  className="bg-muted/50 border-border focus:border-primary h-10"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-foreground text-sm">
                   Email Address <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -146,22 +146,22 @@ const ContactModal = () => {
                   placeholder="john@university.edu"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="bg-muted/50 border-border focus:border-primary h-12"
+                  className="bg-muted/50 border-border focus:border-primary h-10"
                   required
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="message" className="text-foreground">
+              <div className="space-y-1.5">
+                <Label htmlFor="message" className="text-foreground text-sm">
                   Message / Project Idea <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   id="message"
                   name="message"
-                  placeholder="Tell us about your project requirements, tech stack preferences, and deadline..."
+                  placeholder="Tell us about your project requirements..."
                   value={formData.message}
                   onChange={handleInputChange}
-                  className="bg-muted/50 border-border focus:border-primary min-h-[120px] resize-none"
+                  className="bg-muted/50 border-border focus:border-primary min-h-[80px] resize-none"
                   required
                 />
               </div>
@@ -169,8 +169,8 @@ const ContactModal = () => {
               <Button
                 type="submit"
                 variant="glow"
-                size="lg"
-                className="w-full min-h-[48px] mt-2"
+                size="default"
+                className="w-full h-10 mt-1"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Submit Request"}
