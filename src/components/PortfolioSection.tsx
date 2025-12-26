@@ -10,7 +10,7 @@ const projects = [
   {
     id: 1,
     title: "AI Traffic Management System",
-    description: "Real-time traffic analysis with computer vision and ML to optimize urban traffic flow efficiently.",
+    description: "Real-time traffic analysis using computer vision and ML algorithms to optimize urban traffic flow.",
     image: projectImage1,
     tags: ["Python", "TensorFlow", "OpenCV"],
   },
@@ -24,28 +24,28 @@ const projects = [
   {
     id: 3,
     title: "E-Commerce Analytics Platform",
-    description: "Full-stack dashboard with predictive analytics for inventory and sales forecasting insights.",
+    description: "Full-stack dashboard with predictive analytics for inventory management and sales forecasting.",
     image: projectImage3,
     tags: ["React", "Django", "PostgreSQL"],
   },
   {
     id: 4,
     title: "Healthcare Appointment System",
-    description: "Patient management system with real-time scheduling and automated appointment reminders.",
+    description: "Patient management system with real-time scheduling and automated reminders.",
     image: projectImage1,
     tags: ["React", "Node.js", "MongoDB"],
   },
   {
     id: 5,
     title: "Smart Inventory Tracker",
-    description: "IoT-enabled inventory management with barcode scanning and comprehensive analytics dashboard.",
+    description: "IoT-enabled inventory management with barcode scanning and analytics dashboard.",
     image: projectImage2,
     tags: ["Python", "Flask", "MySQL"],
   },
   {
     id: 6,
     title: "Student Portal System",
-    description: "Student management system with grades, attendance tracking, and course registration features.",
+    description: "Comprehensive student management with grades, attendance, and course registration.",
     image: projectImage3,
     tags: ["Java", "Spring Boot", "PostgreSQL"],
   },
@@ -173,15 +173,17 @@ const PortfolioSection = () => {
           </p>
         </div>
       ) : (
-        /* Desktop/Tablet: Uniform Grid Layout */
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
+        /* Desktop/Tablet: Marquee scroll */
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+          <div className="flex animate-marquee-slow hover:[animation-play-state:paused]">
+            {[...projects, ...projects].map((project, index) => (
               <Card
-                key={project.id}
-                className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer h-full flex flex-col"
+                key={`${project.id}-${index}`}
+                className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer flex-shrink-0 w-[320px] sm:w-[380px] mx-3 sm:mx-4"
               >
-                {/* Header: Image */}
                 <div className="relative aspect-video overflow-hidden">
                   <img
                     src={project.image}
@@ -193,17 +195,14 @@ const PortfolioSection = () => {
                   </div>
                 </div>
 
-                {/* Body & Footer with flex structure */}
-                <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                <CardContent className="p-4 sm:p-6">
                   <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
                     {project.title}
                   </h3>
-                  {/* Body: Description with flex-grow */}
-                  <p className="text-muted-foreground text-sm mb-4 flex-grow">
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                     {project.description}
                   </p>
-                  {/* Footer: Tech tags pinned to bottom */}
-                  <div className="flex flex-wrap gap-2 mt-auto">
+                  <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
                       <span key={tag} className="tech-badge">
                         {tag}
