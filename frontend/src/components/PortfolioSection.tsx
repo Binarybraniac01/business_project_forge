@@ -1,62 +1,44 @@
 import { ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { fetchPortfolio, PortfolioProject } from "@/lib/api";
 import projectImage1 from "@/assets/project-dashboard-1.png";
 import projectImage2 from "@/assets/project-dashboard-2.png";
 import projectImage3 from "@/assets/project-dashboard-3.png";
 
-const projects = [
-  {
-    id: 1,
-    title: "AI Traffic Management System",
-    description: "Real-time traffic analysis using computer vision and ML algorithms to optimize urban traffic flow and reduce congestion.",
-    image: projectImage1,
-    tags: ["Python", "TensorFlow", "OpenCV"],
-  },
-  {
-    id: 2,
-    title: "Smart Campus Navigation",
-    description: "Indoor navigation app featuring AR waypoints and comprehensive accessibility features for university campus wayfinding.",
-    image: projectImage2,
-    tags: ["Flutter", "Firebase", "ARCore"],
-  },
-  {
-    id: 3,
-    title: "E-Commerce Analytics Platform",
-    description: "Full-stack analytics dashboard with predictive insights for inventory management and accurate sales forecasting tools.",
-    image: projectImage3,
-    tags: ["React", "Django", "PostgreSQL"],
-  },
-  {
-    id: 4,
-    title: "Healthcare Appointment System",
-    description: "Comprehensive patient management system with real-time scheduling, automated reminders, and medical records tracking.",
-    image: projectImage1,
-    tags: ["React", "Node.js", "MongoDB"],
-  },
-  {
-    id: 5,
-    title: "Smart Inventory Tracker",
-    description: "IoT-enabled inventory management platform with barcode scanning, stock alerts, and real-time analytics dashboard.",
-    image: projectImage2,
-    tags: ["Python", "Flask", "MySQL"],
-  },
-  {
-    id: 6,
-    title: "Student Portal System",
-    description: "Comprehensive student management portal with grades tracking, attendance monitoring, and seamless course registration.",
-    image: projectImage3,
-    tags: ["Java", "Spring Boot", "PostgreSQL"],
-  },
-];
+// Fallback images for projects without image_url
+const fallbackImages = [projectImage1, projectImage2, projectImage3];
 
 const PortfolioSection = () => {
   const isMobile = useIsMobile();
-  const [cardOrder, setCardOrder] = useState(projects.map((_, i) => i));
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cardOrder, setCardOrder] = useState<number[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Fetch portfolio projects on mount
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      try {
+        const data = await fetchPortfolio();
+        setProjects(data);
+        setCardOrder(data.map((_, i) => i));
+      } catch (error) {
+        console.error("Failed to load portfolio:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPortfolio();
+  }, []);
+
+  // Helper to get image for a project
+  const getProjectImage = (project: PortfolioProject, index: number): string => {
+    return project.image_url || fallbackImages[index % fallbackImages.length];
+  };
 
   const handleSwipe = () => {
     if (isAnimating) return;
@@ -94,6 +76,32 @@ const PortfolioSection = () => {
     touchStartRef.current = null;
   };
 
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <section id="portfolio" className="py-16 sm:py-20 lg:py-24 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+              Our Projects that <span className="text-gradient">brings ideas to reality</span>.
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+              Real projects we've delivered. Each one custom-built with clean code and comprehensive documentation.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div className="animate-pulse text-muted-foreground">Loading projects...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // No projects fallback
+  if (projects.length === 0) {
+    return null;
+  }
+
   return (
     <section id="portfolio" className="py-16 sm:py-20 lg:py-24 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
@@ -118,6 +126,7 @@ const PortfolioSection = () => {
           >
             {cardOrder.map((projectIndex, stackIndex) => {
               const project = projects[projectIndex];
+              if (!project) return null;
               const isTop = stackIndex === 0;
               const offset = Math.min(stackIndex, 4); // Only show 5 cards in stack
 
@@ -139,7 +148,7 @@ const PortfolioSection = () => {
                   {/* Image - Top */}
                   <div className="relative aspect-video overflow-hidden flex-shrink-0">
                     <img
-                      src={project.image}
+                      src={getProjectImage(project, projectIndex)}
                       alt={project.title}
                       className="w-full h-full object-cover"
                     />
@@ -193,7 +202,7 @@ const PortfolioSection = () => {
               >
                 <div className="relative aspect-video overflow-hidden">
                   <img
-                    src={project.image}
+                    src={getProjectImage(project, index)}
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
