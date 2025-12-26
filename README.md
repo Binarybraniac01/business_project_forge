@@ -17,7 +17,7 @@ project-forge/
 │   ├── routes/         # API routes
 │   ├── migrations/     # SQL migration scripts
 │   └── ...
-├── .env.example        # Environment variables template
+├── .env                # Environment variables template
 └── .gitignore
 ```
 
@@ -36,6 +36,20 @@ project-forge/
 ni .env
 # Edit .env with your Supabase credentials
 ```
+## Environment Variables
+
+All required environment variables:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+FLASK_SECRET_KEY=your_secret_key
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_admin_password
+```
+
+
 
 ### 2. Setup Database
 
@@ -96,18 +110,7 @@ Access at `/admin` with configured credentials:
 - Supabase (PostgreSQL + Storage)
 - Flask-CORS
 
-## Environment Variables
 
-All required environment variables:
-
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_KEY=your_supabase_service_role_key
-FLASK_SECRET_KEY=your_secret_key
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_admin_password
-```
 
 ## License
 
