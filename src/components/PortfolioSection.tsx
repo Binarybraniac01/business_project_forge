@@ -10,42 +10,42 @@ const projects = [
   {
     id: 1,
     title: "AI Traffic Management System",
-    description: "Real-time traffic analysis using computer vision and ML algorithms to optimize urban traffic flow.",
+    description: "Real-time traffic analysis using computer vision and machine learning algorithms to optimize urban traffic flow and reduce congestion.",
     image: projectImage1,
     tags: ["Python", "TensorFlow", "OpenCV"],
   },
   {
     id: 2,
     title: "Smart Campus Navigation",
-    description: "Indoor navigation app with AR waypoints and accessibility features for university campuses.",
+    description: "Indoor navigation application with augmented reality waypoints and comprehensive accessibility features for university campus users.",
     image: projectImage2,
     tags: ["Flutter", "Firebase", "ARCore"],
   },
   {
     id: 3,
     title: "E-Commerce Analytics Platform",
-    description: "Full-stack dashboard with predictive analytics for inventory management and sales forecasting.",
+    description: "Full-stack analytics dashboard featuring predictive algorithms for inventory management, sales forecasting and business insights.",
     image: projectImage3,
     tags: ["React", "Django", "PostgreSQL"],
   },
   {
     id: 4,
     title: "Healthcare Appointment System",
-    description: "Patient management system with real-time scheduling and automated reminders.",
+    description: "Patient management system with real-time scheduling, automated appointment reminders and secure medical record integration.",
     image: projectImage1,
     tags: ["React", "Node.js", "MongoDB"],
   },
   {
     id: 5,
     title: "Smart Inventory Tracker",
-    description: "IoT-enabled inventory management with barcode scanning and analytics dashboard.",
+    description: "IoT-enabled inventory management solution with barcode scanning, stock alerts and comprehensive analytics dashboard interface.",
     image: projectImage2,
     tags: ["Python", "Flask", "MySQL"],
   },
   {
     id: 6,
     title: "Student Portal System",
-    description: "Comprehensive student management with grades, attendance, and course registration.",
+    description: "Comprehensive student management platform with grades tracking, attendance monitoring and streamlined course registration system.",
     image: projectImage3,
     tags: ["Java", "Spring Boot", "PostgreSQL"],
   },
@@ -107,70 +107,44 @@ const PortfolioSection = () => {
         </div>
       </div>
 
-      {/* Mobile: Swipeable card stack */}
+      {/* Mobile: Vertical scrollable cards with full content */}
       {isMobile ? (
         <div className="container mx-auto px-4">
-          <div 
-            className="relative h-[420px] flex items-center justify-center"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {cardOrder.map((projectIndex, stackIndex) => {
-              const project = projects[projectIndex];
-              const isTop = stackIndex === 0;
-              const offset = Math.min(stackIndex, 4); // Only show 5 cards in stack
-              
-              if (stackIndex > 4) return null;
-
-              return (
-                <Card
-                  key={project.id}
-                  className="glass-card overflow-hidden absolute w-[85%] max-w-[320px] transition-all duration-300 ease-out"
-                  style={{
-                    transform: isTop
-                      ? `translateX(${swipeOffset}px) rotate(${swipeOffset * 0.05}deg) ${isAnimating ? 'translateX(120%) rotate(15deg)' : ''}`
-                      : `translateY(${offset * 8}px) scale(${1 - offset * 0.04})`,
-                    zIndex: 10 - stackIndex,
-                    opacity: isTop && isAnimating ? 0 : 1 - offset * 0.15,
-                    pointerEvents: isTop ? 'auto' : 'none',
-                  }}
-                >
-                  <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end justify-end p-4">
-                      <ExternalLink className="text-primary" size={20} />
-                    </div>
+          <div className="flex flex-col gap-6">
+            {projects.map((project) => (
+              <Card
+                key={project.id}
+                className="glass-card overflow-hidden min-h-[380px] flex flex-col active:scale-[0.98] transition-transform duration-150 cursor-pointer"
+              >
+                <div className="relative aspect-video overflow-hidden flex-shrink-0">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end justify-end p-4">
+                    <ExternalLink className="text-primary" size={20} />
                   </div>
+                </div>
 
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-bold mb-2 text-foreground">
-                      {project.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag) => (
-                        <span key={tag} className="tech-badge">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <h3 className="text-lg font-bold mb-3 text-foreground">
+                    {project.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4 flex-1">
+                    {project.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <span key={tag} className="tech-badge">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-
-          {/* Swipe hint */}
-          <p className="text-center text-muted-foreground text-xs mt-4">
-            Swipe to see more projects
-          </p>
         </div>
       ) : (
         /* Desktop/Tablet: Marquee scroll */
