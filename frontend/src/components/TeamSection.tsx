@@ -1,32 +1,35 @@
 import { Github, Linkedin } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getTeamMembers, fallbackTeam, TeamMember } from "@/lib/api";
+import { fetchTeam, TeamMember } from "@/lib/api";
 
 const TeamSection = () => {
   const isMobile = useIsMobile();
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cardOrder, setCardOrder] = useState<number[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Fetch team members from API
-  const { data: team = fallbackTeam, isLoading } = useQuery<TeamMember[]>({
-    queryKey: ['team'],
-    queryFn: getTeamMembers,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  // Initialize card order when team data changes
+  // Fetch team members on mount
   useEffect(() => {
-    if (team.length > 0) {
-      setCardOrder(team.map((_, i) => i));
-    }
-  }, [team]);
+    const loadTeam = async () => {
+      try {
+        const data = await fetchTeam();
+        setTeam(data);
+        setCardOrder(data.map((_, i) => i));
+      } catch (error) {
+        console.error("Failed to load team:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadTeam();
+  }, []);
 
   const handleSwipe = () => {
-    if (isAnimating || team.length === 0) return;
+    if (isAnimating) return;
     setIsAnimating(true);
 
     setTimeout(() => {
@@ -73,6 +76,12 @@ const TeamSection = () => {
     touchStartRef.current = null;
   };
 
+  // Helper to get color class
+  const getColorClass = (colorTheme: string) => {
+    return colorTheme === "secondary" ? "secondary" : "primary";
+  };
+
+  // Loading state
   if (isLoading) {
     return (
       <section id="team" className="py-24 relative">
@@ -81,11 +90,21 @@ const TeamSection = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Meet the <span className="text-gradient">Builders</span>
             </h2>
-            <p className="text-muted-foreground">Loading team members...</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Three friends who turned their passion for clean code into a mission to help students succeed.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div className="animate-pulse text-muted-foreground">Loading team...</div>
           </div>
         </div>
       </section>
     );
+  }
+
+  // No team members fallback
+  if (team.length === 0) {
+    return null;
   }
 
   return (
@@ -112,6 +131,7 @@ const TeamSection = () => {
               const member = team[memberIndex];
               if (!member) return null;
               const isTop = stackIndex === 0;
+              const color = getColorClass(member.color_theme);
 
               return (
                 <div
@@ -124,28 +144,24 @@ const TeamSection = () => {
                     zIndex: 10 - stackIndex,
                     opacity: isTop && isAnimating ? 0 : 1 - stackIndex * 0.2,
                     pointerEvents: isTop ? 'auto' : 'none',
-                    boxShadow: member.color_theme === "primary"
+                    boxShadow: color === "primary"
                       ? "0 0 40px hsl(217 91% 60% / 0.15)"
                       : "0 0 40px hsl(142 71% 45% / 0.15)"
                   }}
                 >
                   {/* Avatar placeholder */}
                   <div
-                    className={`w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-xl font-bold ${member.color_theme === "primary"
+                    className={`w-16 h-16 rounded-2xl mb-4 flex items-center justify-center text-xl font-bold ${color === "primary"
                         ? "bg-primary/20 text-primary"
                         : "bg-secondary/20 text-secondary"
                       }`}
                   >
-                    {member.avatar_url ? (
-                      <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover rounded-2xl" />
-                    ) : (
-                      member.name.split(" ").map(n => n[0]).join("")
-                    )}
+                    {member.name.split(" ").map(n => n[0]).join("")}
                   </div>
 
                   <h3 className="text-lg font-bold mb-1">{member.name}</h3>
                   <div
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-3 ${member.color_theme === "primary"
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-3 ${color === "primary"
                         ? "bg-primary/20 text-primary"
                         : "bg-secondary/20 text-secondary"
                       }`}
@@ -178,66 +194,65 @@ const TeamSection = () => {
         ) : (
           /* Desktop/Tablet: Original grid layout */
           <div className="grid md:grid-cols-3 gap-6">
-            {team.map((member) => (
-              <div
-                key={member.id}
-                className="group glass-card rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
-                style={{
-                  boxShadow: member.color_theme === "primary"
-                    ? "0 0 40px hsl(217 91% 60% / 0.1)"
-                    : "0 0 40px hsl(142 71% 45% / 0.1)"
-                }}
-              >
-                {/* Avatar placeholder */}
+            {team.map((member) => {
+              const color = getColorClass(member.color_theme);
+              return (
                 <div
-                  className={`w-20 h-20 rounded-2xl mb-4 flex items-center justify-center text-2xl font-bold ${member.color_theme === "primary"
-                      ? "bg-primary/20 text-primary"
-                      : "bg-secondary/20 text-secondary"
-                    }`}
+                  key={member.id}
+                  className="group glass-card rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
+                  style={{
+                    boxShadow: color === "primary"
+                      ? "0 0 40px hsl(217 91% 60% / 0.1)"
+                      : "0 0 40px hsl(142 71% 45% / 0.1)"
+                  }}
                 >
-                  {member.avatar_url ? (
-                    <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover rounded-2xl" />
-                  ) : (
-                    member.name.split(" ").map(n => n[0]).join("")
-                  )}
+                  {/* Avatar placeholder */}
+                  <div
+                    className={`w-20 h-20 rounded-2xl mb-4 flex items-center justify-center text-2xl font-bold ${color === "primary"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-secondary/20 text-secondary"
+                      }`}
+                  >
+                    {member.name.split(" ").map(n => n[0]).join("")}
+                  </div>
+
+                  <h3 className="text-xl font-bold mb-1">{member.name}</h3>
+                  <div
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${color === "primary"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-secondary/20 text-secondary"
+                      }`}
+                  >
+                    {member.role}
+                  </div>
+
+                  <p className="text-muted-foreground text-sm mb-4">{member.bio}</p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {member.skills.map((skill, i) => (
+                      <span key={i} className="px-2 py-1 bg-muted rounded text-xs text-muted-foreground">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3 pt-4 border-t border-border">
+                    <a href={member.github_url || "#"} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Github size={18} />
+                    </a>
+                    <a href={member.linkedin_url || "#"} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Linkedin size={18} />
+                    </a>
+                  </div>
+
+                  {/* Hover glow effect */}
+                  <div
+                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl ${color === "primary" ? "glow-primary" : "glow-secondary"
+                      }`}
+                  />
                 </div>
-
-                <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                <div
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${member.color_theme === "primary"
-                      ? "bg-primary/20 text-primary"
-                      : "bg-secondary/20 text-secondary"
-                    }`}
-                >
-                  {member.role}
-                </div>
-
-                <p className="text-muted-foreground text-sm mb-4">{member.bio}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {member.skills.map((skill, i) => (
-                    <span key={i} className="px-2 py-1 bg-muted rounded text-xs text-muted-foreground">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-border">
-                  <a href={member.github_url || "#"} className="text-muted-foreground hover:text-primary transition-colors">
-                    <Github size={18} />
-                  </a>
-                  <a href={member.linkedin_url || "#"} className="text-muted-foreground hover:text-primary transition-colors">
-                    <Linkedin size={18} />
-                  </a>
-                </div>
-
-                {/* Hover glow effect */}
-                <div
-                  className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl ${member.color_theme === "primary" ? "glow-primary" : "glow-secondary"
-                    }`}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -1,45 +1,43 @@
 import { ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getPortfolioProjects, fallbackPortfolio, PortfolioProject } from "@/lib/api";
+import { useState, useRef, useEffect } from "react";
+import { fetchPortfolio, PortfolioProject } from "@/lib/api";
 import projectImage1 from "@/assets/project-dashboard-1.png";
 import projectImage2 from "@/assets/project-dashboard-2.png";
 import projectImage3 from "@/assets/project-dashboard-3.png";
 
-// Fallback images for when no image_url is provided
+// Fallback images for projects without image_url
 const fallbackImages = [projectImage1, projectImage2, projectImage3];
 
 const PortfolioSection = () => {
   const isMobile = useIsMobile();
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cardOrder, setCardOrder] = useState<number[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Fetch portfolio projects from API
-  const { data: projects = fallbackPortfolio, isLoading } = useQuery<PortfolioProject[]>({
-    queryKey: ['portfolio'],
-    queryFn: getPortfolioProjects,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  // Fetch portfolio projects on mount
+  useEffect(() => {
+    const loadPortfolio = async () => {
+      try {
+        const data = await fetchPortfolio();
+        setProjects(data);
+        setCardOrder(data.map((_, i) => i));
+      } catch (error) {
+        console.error("Failed to load portfolio:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPortfolio();
+  }, []);
 
-  // Initialize card order when projects change
-  useState(() => {
-    if (projects.length > 0 && cardOrder.length === 0) {
-      setCardOrder(projects.map((_, i) => i));
-    }
-  });
-
-  // Update card order when projects change
-  if (projects.length > 0 && cardOrder.length !== projects.length) {
-    setCardOrder(projects.map((_, i) => i));
-  }
-
-  const getProjectImage = (project: PortfolioProject, index: number) => {
-    if (project.image_url) return project.image_url;
-    return fallbackImages[index % fallbackImages.length];
+  // Helper to get image for a project
+  const getProjectImage = (project: PortfolioProject, index: number): string => {
+    return project.image_url || fallbackImages[index % fallbackImages.length];
   };
 
   const handleSwipe = () => {
@@ -78,6 +76,7 @@ const PortfolioSection = () => {
     touchStartRef.current = null;
   };
 
+  // Loading skeleton
   if (isLoading) {
     return (
       <section id="portfolio" className="py-16 sm:py-20 lg:py-24 overflow-hidden">
@@ -86,11 +85,21 @@ const PortfolioSection = () => {
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
               Our Projects that <span className="text-gradient">brings ideas to reality</span>.
             </h2>
-            <p className="text-muted-foreground">Loading projects...</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+              Real projects we've delivered. Each one custom-built with clean code and comprehensive documentation.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div className="animate-pulse text-muted-foreground">Loading projects...</div>
           </div>
         </div>
       </section>
     );
+  }
+
+  // No projects fallback
+  if (projects.length === 0) {
+    return null;
   }
 
   return (
@@ -193,7 +202,7 @@ const PortfolioSection = () => {
               >
                 <div className="relative aspect-video overflow-hidden">
                   <img
-                    src={getProjectImage(project, index % projects.length)}
+                    src={getProjectImage(project, index)}
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -206,7 +215,7 @@ const PortfolioSection = () => {
                   <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
                     {project.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
                     {project.description}
                   </p>
                   <div className="flex flex-wrap gap-2">

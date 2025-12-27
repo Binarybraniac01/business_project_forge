@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { submitContactForm } from "@/lib/api";
+import { submitContact } from "@/lib/api";
 
 const ContactModal = () => {
   const { isOpen, closeModal } = useContactModal();
@@ -50,17 +50,18 @@ const ContactModal = () => {
     setIsSubmitting(true);
 
     try {
-      await submitContactForm({
+      await submitContact({
         name: formData.name,
         email: formData.email,
         message: formData.message,
-        phone: formData.phone,
+        phone: formData.phone || undefined,
       });
+
       setFormData({ name: "", phone: "", email: "", message: "" });
       closeModal();
       toast.success("Request Sent! We'll contact you shortly.");
     } catch (error) {
-      console.error("Contact form error:", error);
+      console.error("Failed to submit contact form:", error);
       toast.error("Failed to send request. Please try again.");
     } finally {
       setIsSubmitting(false);
