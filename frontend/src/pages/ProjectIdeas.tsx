@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, ExternalLink, FileText, ChevronUp } from "lucide-react";
+import { ArrowRight, ExternalLink, FileText, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -15,6 +15,9 @@ import projectImage3 from "@/assets/project-dashboard-3.png";
 
 // Fallback images for templates without image_url
 const fallbackImages = [projectImage1, projectImage2, projectImage3];
+
+// Items per page
+const ITEMS_PER_PAGE = 8;
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -36,6 +39,7 @@ const ProjectIdeas = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [modalProject, setModalProject] = useState<ProjectTemplate | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch templates on mount
   useEffect(() => {
@@ -52,6 +56,19 @@ const ProjectIdeas = () => {
     loadTemplates();
   }, []);
 
+  // Calculate pagination
+  const totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentTemplates = templates.slice(startIndex, endIndex);
+
+  // Handle page change
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of grid
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  };
+
   // Helper to get image for a template
   const getTemplateImage = (template: ProjectTemplate, index: number): string => {
     return template.image_url || fallbackImages[index % fallbackImages.length];
@@ -63,6 +80,42 @@ const ProjectIdeas = () => {
     } else {
       setModalProject(project);
     }
+  };
+
+  // Generate page numbers to show
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 7) {
+      // Show all pages if 7 or fewer
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push('...');
+      }
+
+      // Show pages around current page
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('...');
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
   };
 
   return (
@@ -118,7 +171,7 @@ const ProjectIdeas = () => {
       </section>
 
       {/* Projects Grid */}
-      <section className="pb-16 sm:pb-20 lg:pb-24">
+      <section className="pb-8 sm:pb-12">
         <div className="container mx-auto px-4 sm:px-6">
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -129,91 +182,147 @@ const ProjectIdeas = () => {
               No templates available yet. Check back soon!
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {templates.map((project, index) => {
-                const isExpanded = expandedCardId === project.id;
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {currentTemplates.map((project, index) => {
+                  const isExpanded = expandedCardId === project.id;
+                  const absoluteIndex = startIndex + index;
 
-                return (
-                  <Card
-                    key={project.id}
-                    className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col"
-                  >
-                    {/* Image Container - 16:9 aspect ratio */}
-                    <div className="relative aspect-video overflow-hidden">
-                      <img
-                        src={getTemplateImage(project, index)}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getDifficultyColor(project.difficulty)}`}>
-                          {project.difficulty}
-                        </span>
-                      </div>
-                    </div>
-
-                    <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
-                      <h3 className="text-base sm:text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {project.title}
-                      </h3>
-
-                      {/* Description - truncated by default, full on mobile expand */}
-                      <p className={`text-muted-foreground text-sm mb-4 transition-all duration-300 ${isMobile && isExpanded ? '' : 'line-clamp-2'
-                        }`}>
-                        {project.description}
-                      </p>
-
-                      {/* Tech Tags - limited by default, all on mobile expand */}
-                      <div className={`flex flex-wrap gap-1.5 mb-4 items-start transition-all duration-300 ${isMobile && isExpanded ? '' : 'flex-grow'
-                        }`}>
-                        {(isMobile && isExpanded ? project.tags : project.tags.slice(0, 3)).map((tag) => (
-                          <span key={tag} className="tech-badge text-xs">
-                            {tag}
+                  return (
+                    <Card
+                      key={project.id}
+                      className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col"
+                    >
+                      {/* Image Container - 16:9 aspect ratio */}
+                      <div className="relative aspect-video overflow-hidden">
+                        <img
+                          src={getTemplateImage(project, absoluteIndex)}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute top-3 right-3">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getDifficultyColor(project.difficulty)}`}>
+                            {project.difficulty}
                           </span>
-                        ))}
-                        {!isMobile && project.tags.length > 3 && (
-                          <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
-                        )}
-                        {isMobile && !isExpanded && project.tags.length > 3 && (
-                          <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
-                        )}
+                        </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          variant="glow"
-                          size="sm"
-                          className="flex-1 gap-2 min-h-[40px]"
-                          onClick={() => project.live_preview_url && window.open(project.live_preview_url, '_blank')}
-                        >
-                          <ExternalLink size={14} />
-                          Live Preview
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 gap-2 min-h-[40px] border-border hover:bg-muted/50"
-                          onClick={() => handleTechSpecsClick(project)}
-                        >
-                          {isMobile && isExpanded ? (
-                            <>
-                              <ChevronUp size={14} />
-                              Show Less
-                            </>
-                          ) : (
-                            <>
-                              <FileText size={14} />
-                              Tech Specs
-                            </>
+                      <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                        <h3 className="text-base sm:text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                          {project.title}
+                        </h3>
+
+                        {/* Description - truncated by default, full on mobile expand */}
+                        <p className={`text-muted-foreground text-sm mb-4 transition-all duration-300 ${isMobile && isExpanded ? '' : 'line-clamp-2'
+                          }`}>
+                          {project.description}
+                        </p>
+
+                        {/* Tech Tags - limited by default, all on mobile expand */}
+                        <div className={`flex flex-wrap gap-1.5 mb-4 items-start transition-all duration-300 ${isMobile && isExpanded ? '' : 'flex-grow'
+                          }`}>
+                          {(isMobile && isExpanded ? project.tags : project.tags.slice(0, 3)).map((tag) => (
+                            <span key={tag} className="tech-badge text-xs">
+                              {tag}
+                            </span>
+                          ))}
+                          {!isMobile && project.tags.length > 3 && (
+                            <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
                           )}
+                          {isMobile && !isExpanded && project.tags.length > 3 && (
+                            <span className="tech-badge text-xs">+{project.tags.length - 3}</span>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button
+                            variant="glow"
+                            size="sm"
+                            className="flex-1 gap-2 min-h-[40px]"
+                            onClick={() => project.live_preview_url && window.open(project.live_preview_url, '_blank')}
+                          >
+                            <ExternalLink size={14} />
+                            Live Preview
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 gap-2 min-h-[40px] border-border hover:bg-muted/50"
+                            onClick={() => handleTechSpecsClick(project)}
+                          >
+                            {isMobile && isExpanded ? (
+                              <>
+                                <ChevronUp size={14} />
+                                Show Less
+                              </>
+                            ) : (
+                              <>
+                                <FileText size={14} />
+                                Tech Specs
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-12">
+                  {/* Previous Button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="h-10 w-10"
+                  >
+                    <ChevronLeft size={18} />
+                  </Button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1">
+                    {getPageNumbers().map((page, index) => (
+                      page === '...' ? (
+                        <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">...</span>
+                      ) : (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="icon"
+                          onClick={() => goToPage(page as number)}
+                          className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
+                        >
+                          {page}
                         </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                      )
+                    ))}
+                  </div>
+
+                  {/* Next Button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="h-10 w-10"
+                  >
+                    <ChevronRight size={18} />
+                  </Button>
+                </div>
+              )}
+
+              {/* Page Info */}
+              {totalPages > 1 && (
+                <div className="text-center mt-4 text-sm text-muted-foreground">
+                  Showing {startIndex + 1}-{Math.min(endIndex, templates.length)} of {templates.length} templates
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
