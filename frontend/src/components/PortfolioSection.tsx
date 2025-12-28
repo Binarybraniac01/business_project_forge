@@ -190,46 +190,86 @@ const PortfolioSection = () => {
           </p>
         </div>
       ) : (
-        /* Desktop/Tablet: Marquee scroll */
-        <div className="relative">
+        /* Desktop/Tablet: Marquee scroll - Seamless infinite loop */
+        <div className="relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
-          <div className="flex animate-marquee-slow hover:[animation-play-state:paused]">
-            {[...projects, ...projects].map((project, index) => (
-              <Card
-                key={`${project.id}-${index}`}
-                className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer flex-shrink-0 w-[320px] sm:w-[380px] mx-3 sm:mx-4"
-                onClick={() => project.live_link && window.open(project.live_link, '_blank', 'noopener,noreferrer')}
-              >
-                <div className="relative aspect-video overflow-hidden">
-                  <img
-                    src={getProjectImage(project, index)}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-4">
-                    <ExternalLink className="text-primary" size={20} />
+          <div className="flex hover:[animation-play-state:paused] group/marquee">
+            {/* First track - contains one full set of projects */}
+            <div className="flex animate-marquee-slow group-hover/marquee:[animation-play-state:paused]">
+              {projects.map((project, index) => (
+                <Card
+                  key={`first-${project.id}`}
+                  className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer flex-shrink-0 w-[320px] sm:w-[380px] mx-3 sm:mx-4"
+                  onClick={() => project.live_link && window.open(project.live_link, '_blank', 'noopener,noreferrer')}
+                >
+                  <div className="relative aspect-video overflow-hidden">
+                    <img
+                      src={getProjectImage(project, index)}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-4">
+                      <ExternalLink className="text-primary" size={20} />
+                    </div>
                   </div>
-                </div>
 
-                <CardContent className="p-4 sm:p-6">
-                  <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
-                    {project.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag) => (
-                      <span key={tag} className="tech-badge">
-                        {tag}
-                      </span>
-                    ))}
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
+                      {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="tech-badge">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {/* Second track - duplicate for seamless loop */}
+            <div className="flex animate-marquee-slow group-hover/marquee:[animation-play-state:paused]">
+              {projects.map((project, index) => (
+                <Card
+                  key={`second-${project.id}`}
+                  className="group glass-card overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer flex-shrink-0 w-[320px] sm:w-[380px] mx-3 sm:mx-4"
+                  onClick={() => project.live_link && window.open(project.live_link, '_blank', 'noopener,noreferrer')}
+                >
+                  <div className="relative aspect-video overflow-hidden">
+                    <img
+                      src={getProjectImage(project, index)}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-4">
+                      <ExternalLink className="text-primary" size={20} />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
+                      {project.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="tech-badge">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       )}
