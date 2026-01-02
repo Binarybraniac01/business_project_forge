@@ -43,4 +43,6 @@ how_to_run.txt
 task1_high_priority.txt
 task2.txt
 *.log
+env.backup
+
 

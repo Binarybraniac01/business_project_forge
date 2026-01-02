@@ -9,6 +9,7 @@ import { useContactModal } from "@/contexts/ContactModalContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import TechSpecsModal from "@/components/TechSpecsModal";
 import { fetchTemplates, ProjectTemplate } from "@/lib/api";
+import { toast } from "sonner";
 import projectImage1 from "@/assets/project-dashboard-1.png";
 import projectImage2 from "@/assets/project-dashboard-2.png";
 import projectImage3 from "@/assets/project-dashboard-3.png";
@@ -79,6 +80,21 @@ const ProjectIdeas = () => {
       setExpandedCardId(expandedCardId === project.id ? null : project.id);
     } else {
       setModalProject(project);
+    }
+  };
+
+  // Handle live preview button click
+  const handleLivePreview = (url: string | null) => {
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      toast.error("Live preview currently unavailable!", {
+        style: {
+          background: '#164185ff',
+          color: '#ffffffff',
+          border: '1px solid #0661d9ff',
+        },
+      });
     }
   };
 
@@ -240,7 +256,7 @@ const ProjectIdeas = () => {
                             variant="glow"
                             size="sm"
                             className="flex-1 gap-2 min-h-[40px]"
-                            onClick={() => project.live_preview_url && window.open(project.live_preview_url, '_blank')}
+                            onClick={() => handleLivePreview(project.live_preview_url)}
                           >
                             <ExternalLink size={14} />
                             Live Preview
