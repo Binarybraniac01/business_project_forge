@@ -21,7 +21,7 @@ const ValueProposition = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Why Choose <span className="text-gradient">DevForge</span>?
+            Why Choose <span className="text-gradient">MakeMyProject</span>?
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             We're not another freelancer marketplace. We're developers who've been in your shoes.
@@ -52,7 +52,7 @@ const ValueProposition = () => {
                     <Check className="w-4 h-4 text-secondary" />
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-secondary mb-1">DEVFORGE</div>
+                    <div className="text-xs font-medium text-secondary mb-1">MakeMyProject</div>
                     <p className="text-foreground text-sm font-medium">{item.us}</p>
                   </div>
                 </div>
