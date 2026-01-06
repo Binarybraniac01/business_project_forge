@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 interface ImageUploadProps {
     value: string | null;
